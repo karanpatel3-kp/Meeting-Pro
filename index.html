@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4658c8">
+  <title>Meeting Pro | Meeting tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div><p class="eyebrow">MEETING WORKSPACE</p><h1>Meeting Pro</h1><p class="subhead">Agenda, outcomes, and follow-up in one place.</p></div>
+      <button id="newMeeting" class="button button-primary">＋ New meeting</button>
+    </header>
+    <section class="notice" id="storageNotice"><strong>Starter version:</strong> this prototype saves data in this browser only. Other meeting participants will not see it. Shared storage, sign-in, voting, and Planner sync require a connected backend.</section>
+    <section class="meeting-bar">
+      <label for="meetingTitle">Meeting name</label>
+      <input id="meetingTitle" maxlength="120" placeholder="e.g. Weekly project review">
+      <label for="meetingDate">Date</label>
+      <input id="meetingDate" type="date">
+      <div class="bar-actions"><button id="downloadSummary" class="button button-primary">Download meeting summary</button><button id="exportData" class="button button-light">Export JSON</button></div>
+    </section>
+    <nav class="tabs" aria-label="Meeting sections">
+      <button class="tab active" data-tab="agenda">Agenda <span id="agendaCount" class="count">0</span></button>
+      <button class="tab" data-tab="meetingNotes">Meeting Notes</button>
+      <button class="tab" data-tab="decisions">Conclusion <span id="decisionCount" class="count">0</span></button>
+      <button class="tab" data-tab="actions">Action items with assigned Owners <span id="actionCount" class="count">0</span></button>
+    </nav>
+    <section id="agendaPanel" class="panel">
+      <div class="panel-heading"><div><h2>Agenda</h2><p>Set topics, owners, and time. Start a timer when you begin.</p></div><button id="addAgenda" class="button button-primary">＋ Add topic</button></div>
+      <div id="agendaList" class="card-list"></div>
+      <form id="agendaForm" class="form-card hidden">
+        <h3>New agenda topic</h3>
+        <div class="form-grid"><label>Topic<input name="title" required maxlength="160" placeholder="Topic title"></label><label>Presenter<input name="owner" maxlength="100" placeholder="Name"></label><label>Minutes<input name="minutes" type="number" min="1" max="240" value="10" required></label><label>Notes<textarea name="notes" rows="2" maxlength="1000" placeholder="Context or desired outcome"></textarea></label></div>
+        <div class="form-actions"><button type="button" class="button button-light" data-cancel="agendaForm">Cancel</button><button class="button button-primary">Save topic</button></div>
+      </form>
+      <div id="emptyAgenda" class="empty-state"><span class="empty-icon">☷</span><h3>No agenda topics yet</h3><p>Add a topic to prepare the meeting.</p></div>
+    </section>
+    <section id="meetingNotesPanel" class="panel hidden">
+      <div class="panel-heading"><div><h2>Meeting Notes</h2><p>Type notes or import a transcript from an earlier meeting.</p></div><div><input id="transcriptFile" class="visually-hidden" type="file" accept=".txt,.vtt,.srt,text/plain"><button id="importTranscript" class="button button-light">Import transcript</button></div></div>
+      <p class="import-hint">Supports text, WebVTT, and SRT transcript files. Imported text is kept here; add conclusions and assigned actions in their tabs.</p>
+      <label class="notes-label" for="meetingNotes">Meeting notes or transcript</label><textarea id="meetingNotes" class="meeting-notes" rows="12" maxlength="12000" placeholder="Type meeting notes or import a saved transcript. These notes will appear under Meeting Notes in the downloaded summary."></textarea>
+    </section>
+    <section id="decisionsPanel" class="panel hidden">
+      <div class="panel-heading"><div><h2>Conclusion</h2><p>Record meeting conclusions and link them to agenda topics.</p></div><button id="addDecision" class="button button-primary">＋ Record conclusion</button></div>
+      <div id="decisionList" class="card-list"></div>
+      <form id="decisionForm" class="form-card hidden">
+        <h3>Record a conclusion</h3>
+        <div class="form-grid"><label>Conclusion<input name="title" required maxlength="220" placeholder="What was concluded or decided?"></label><label>Related topic<select name="agendaId" id="decisionAgenda"></select></label><label>Status<select name="status"><option>Proposed</option><option>Approved</option><option>Rejected</option><option>Deferred</option></select></label><label>Owner<input name="owner" maxlength="100" placeholder="Person responsible"></label><label class="full">Rationale / notes<textarea name="notes" rows="3" maxlength="2000" placeholder="Why was this decision made?"></textarea></label></div>
+        <div class="form-actions"><button type="button" class="button button-light" data-cancel="decisionForm">Cancel</button><button class="button button-primary">Save decision</button></div>
+      </form>
+      <div id="emptyDecisions" class="empty-state"><span class="empty-icon">✓</span><h3>No conclusions recorded</h3><p>Capture the meeting conclusion or decisions here.</p></div>
+    </section>
+    <section id="actionsPanel" class="panel hidden">
+      <div class="panel-heading"><div><h2>Action items with assigned Owners</h2><p>Track each follow-up task, its owner, due date, and completion.</p></div><button id="addAction" class="button button-primary">＋ Add action</button></div>
+      <div id="actionList" class="card-list"></div>
+      <form id="actionForm" class="form-card hidden">
+        <h3>New action item</h3>
+        <div class="form-grid"><label>Action<input name="title" required maxlength="220" placeholder="What needs to be done?"></label><label>Assigned owner<input name="owner" maxlength="100" placeholder="Person responsible" required></label><label>Due date<input name="due" type="date"></label><label>Related topic<select name="agendaId" id="actionAgenda"></select></label></div>
+        <div class="form-actions"><button type="button" class="button button-light" data-cancel="actionForm">Cancel</button><button class="button button-primary">Save action</button></div>
+      </form>
+      <div id="emptyActions" class="empty-state"><span class="empty-icon">☑</span><h3>No action items yet</h3><p>Add follow-up tasks and assign an owner.</p></div>
+    </section>
+    <footer>Meeting Pro prototype · Use the export button to keep a copy of this browser's data.</footer>
+  </main>
+  <dialog id="timerDialog" class="timer-dialog"><button class="dialog-close" id="closeTimer" aria-label="Close">×</button><p class="eyebrow">TOPIC TIMER</p><h2 id="timerTitle"></h2><div id="timerClock" class="timer-clock">10:00</div><p id="timerOwner" class="subhead"></p><div class="timer-controls"><button id="timerPause" class="button button-light">Pause</button><button id="timerReset" class="button button-light">Reset</button></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
